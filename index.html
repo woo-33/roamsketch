@@ -481,6 +481,21 @@
     <script>
         const artworks = [
             {
+                id: 7,
+                title: "另一個角度學習傳世經典",
+                sub: "++ 纸本速写组图 ++",
+                date: "2026.09",
+                medium: "纸本、圆珠笔",
+                year: "2026",
+                images: [
+                    "images/0922001.jpg",
+                    "images/0922002.jpg",
+                    "images/0922003.jpg",
+                    "images/0922004.jpg",
+                    "images/0922005.jpg",
+                ]
+            },
+            {
                 id: 6,
                 title: "你又認識多少名作",
                 sub: "++ 纸本速写组图 ++",
@@ -596,7 +611,7 @@
             const archiveContainer = document.getElementById('archive-container');
 
             // ✅ 修改后：填入你想要展示在首页的作品 id（按你想显示的顺序排）
-            const featuredIds = [6, 5, 2]; 
+            const featuredIds = [7, 6, 5]; 
 
            // 根据 ID 匹配出对应的作品
             const latestArtworks = featuredIds
