@@ -392,21 +392,22 @@
             body { padding: 0 5vw; }
 
             header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 14px;
-                padding: 16px 4vw;
+                padding: 12px 4vw;
             }
-            .logo img { height: 40px; }
+            .logo img { height: 30px; }
             nav ul {
-                width: 100%;
-                gap: 16px;
-                flex-wrap: wrap;
-                justify-content: space-between;
+                gap: 8px;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                max-width: 68vw;
             }
+            nav ul::-webkit-scrollbar { display: none; }
             nav a {
-                font-size: 9.5px;
-                letter-spacing: 0.12em;
+                font-size: 8.5px;
+                letter-spacing: 0.04em;
+                white-space: nowrap;
             }
 
             .exhibition-row, .exhibition-row.reverse {
