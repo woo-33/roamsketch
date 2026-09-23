@@ -22,6 +22,7 @@
             line-height: 1.6;
             letter-spacing: 0.05em;
             padding: 0 12vw; 
+            overflow-x: hidden;
         }
 
         a { color: inherit; text-decoration: none; }
@@ -389,6 +390,25 @@
 
         @media (max-width: 768px) {
             body { padding: 0 5vw; }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 14px;
+                padding: 16px 4vw;
+            }
+            .logo img { height: 40px; }
+            nav ul {
+                width: 100%;
+                gap: 16px;
+                flex-wrap: wrap;
+                justify-content: space-between;
+            }
+            nav a {
+                font-size: 9.5px;
+                letter-spacing: 0.12em;
+            }
+
             .exhibition-row, .exhibition-row.reverse {
                 flex-direction: column-reverse;
                 gap: 25px;
