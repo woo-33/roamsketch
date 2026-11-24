@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKETCHBOOK GALERIE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+            background-color: #fbfbfd; 
+            background-image: url('001.png');
+            background-repeat: repeat;
+            background-size: 500px auto;
+            background-attachment: fixed;
+            color: #111111;
+            line-height: 1.6;
+            letter-spacing: 0.05em;
+            padding: 0 12vw; 
+            overflow-x: hidden;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        /* --------------------------------------------------
+           Header 导航栏
+        -------------------------------------------------- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 2vw; 
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            background: rgba(251, 251, 253, 0.6); 
+            backdrop-filter: blur(5px);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            height: auto;
+        }
+
+        .logo img {
+            height: 65px; 
+            width: auto;
+            display: block;
+            border-radius: 6px;
+            object-fit: contain;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 35px;
+            align-items: center;
+        }
+
+        nav a {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: #777;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover, nav a.active { color: #000; }
+
+        .page {
+            display: none;
+            padding: 80px 0 120px 0;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .page.active-page { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --------------------------------------------------
+           1. 首页展厅（紧凑卡片网格）
+        -------------------------------------------------- */
+        .home-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+            gap: 24px 18px;
+        }
+
+        .home-card {
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 12px;
+            padding: 8px 8px 10px;
+            box-shadow: 0 8px 20px -12px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .home-card:hover { transform: translateY(-3px); box-shadow: 0 14px 28px -12px rgba(0,0,0,0.14); }
+
+        .artwork-image-wrapper {
+            position: relative;
+            aspect-ratio: 4 / 5;
+            background: rgba(245,245,247,0.9);
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .artwork-image-wrapper img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .home-card-info { padding: 10px 4px 0; }
+        .exhibition-tag {
+            font-size: 9px;
+            text-transform: uppercase;
+            color: #a0a0a0;
+            letter-spacing: 0.15em;
+            display: block;
+        }
+        .exhibition-title {
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            line-height: 1.4;
+            margin: 2px 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .exhibition-date { font-size: 10px; color: #aaa; }
+
+        /* 切换按钮 */
+        .img-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.75);
+            border: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 24px;
+            text-align: center;
+            color: #333;
+            opacity: 0;
+            transition: opacity 0.3s ease, background 0.2s ease;
+            z-index: 5;
+        }
+        .artwork-image-wrapper:hover .img-btn { opacity: 1; }
+        .img-btn:hover { background: rgba(255, 255, 255, 0.95); }
+        .prev-btn { left: 6px; }
+        .next-btn { right: 6px; }
+
+        /* 小圆点指示器 */
+        .dots-container {
+            position: absolute;
+            bottom: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 4px;
+            z-index: 5;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 3px 6px;
+            border-radius: 8px;
+            max-width: 90%;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transition: background 0.3s ease;
+        }
+        .dot.active { background: #fff; }
+
+        /* --------------------------------------------------
+           3. 详情页（已修改：返回键与缩略图位于大图上方）
+        -------------------------------------------------- */
+        .detail-view {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .wall-display {
+            background-color: rgba(255, 255, 255, 0.6);
+            width: 100%;
+            padding: 30px 20px 50px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 16px;
+        }
+
+        /* 顶部操作栏（包含返回按钮 + 缩略图） */
+        .detail-top-bar {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 0 10px;
+        }
+
+        .back-btn {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: #666;
+            cursor: pointer;
+            transition: color 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .back-btn:hover { color: #000; }
+
+        .thumbs-list {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .thumb-item {
+            width: 50px;
+            height: 50px;
+            border-radius: 6px;
+            object-fit: cover;
+            cursor: pointer;
+            opacity: 0.4;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .thumb-item:hover, .thumb-item.active-thumb {
+            opacity: 1;
+            border-color: #111;
+        }
+
+        .detail-img-container img {
+            max-width: 100%;
+            max-height: 580px;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.15);
+            transition: opacity 0.2s ease;
+        }
+
+        .detail-meta {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 20px 30px;
+            border-radius: 12px;
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+
+        /* --------------------------------------------------
+           4. 关于页面
+        -------------------------------------------------- */
+        .about-container {
+            max-width: 750px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 40px;
+            border-radius: 16px;
+            border: 1px solid rgba(0,0,0,0.04);
+            box-shadow: 0 10px 30px -15px rgba(0,0,0,0.05);
+            backdrop-filter: blur(8px);
+        }
+
+        .about-image-wrapper {
+            max-width: 260px;
+            width: 100%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .about-image-wrapper img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            object-fit: contain;
+        }
+
+        .about-text {
+            flex: 1;
+            text-align: left;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 0 5vw; }
+
+            header {
+                padding: 12px 4vw;
+            }
+            .logo img { height: 30px; }
+            nav ul {
+                gap: 8px;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                max-width: 68vw;
+            }
+            nav ul::-webkit-scrollbar { display: none; }
+            nav a {
+                font-size: 8.5px;
+                letter-spacing: 0.04em;
+                white-space: nowrap;
+            }
+
+            .page { padding: 30px 0 70px 0; }
+            .home-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 14px 10px;
+            }
+            .home-card { padding: 6px 6px 8px; border-radius: 10px; }
+            .exhibition-title { font-size: 12px; }
+            .img-btn { opacity: 1; width: 24px; height: 24px; line-height: 22px; }
+
+            .detail-top-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .about-container {
+                flex-direction: column;
+                gap: 25px;
+                padding: 30px 20px;
+            }
+            .about-image-wrapper { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <a href="#" onclick="switchPage('home')">
+                <img src="logo.png" alt="logo">
+            </a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#" class="nav-link active" onclick="switchPage('home', this)">所有内容 / All</a></li>
+                <li><a href="#" class="nav-link" onclick="switchPage('about', this)">关于 / About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="home" class="page active-page"></main>
+
+    <!-- 详情页 -->
+    <main id="detail" class="page">
+        <div class="detail-view">
+            <div class="wall-display">
+                <!-- 顶栏：返回按钮 + 缩略图切换 -->
+                <div class="detail-top-bar">
+                    <span class="back-btn" onclick="switchPage('home')">← 返回 / BACK</span>
+                    <div class="thumbs-list" id="detail-thumbs"></div>
+                </div>
+
+                <!-- 中央大图 -->
+                <div class="detail-img-container">
+                    <img id="detail-img" src="" alt="详情作品">
+                </div>
+            </div>
+
+            <!-- 底部文案 -->
+            <div class="detail-meta">
+                <h2 id="detail-title" style="font-size:16px; font-weight:400; margin-bottom:6px;">作品名称</h2>
+                <p id="detail-medium" style="font-size:11px; color:#666;">材质 / 媒介</p>
+                <p id="detail-year" style="font-size:11px; color:#888;">年份</p>
+            </div>
+        </div>
+    </main>
+
+    <main id="about" class="page">
+        <div class="about-container">
+            <div class="about-image-wrapper">
+                <img src="about.jpg" alt="about">
+            </div>
+            <div class="about-text">
+                <h3 style="font-size: 16px; font-weight: 500; margin-bottom: 12px; letter-spacing: 0.1em;">ABOUT ME</h3>
+                <p style="font-size: 13px; color: #444; margin-bottom: 20px; line-height: 1.8;">
+                    绘画专业学代码新手。记录日常速写，捕捉瞬间感知。爱旅游的我，同步创建旅行博客：<a href="https://woo-33.github.io/roamloom/" target="_blank" style="color: #888; text-decoration: underline; text-underline-offset: 3px;">https://woo-33.github.io/roamloom/</a>
+                </p>
+               <p style="font-size: 12px; color: #ffffff; font-weight: 600; letter-spacing: 0.05em; display: inline-block; background: #111111; padding: 6px 14px; border-radius: 20px; margin-top: 10px;">
+    Contact: <a href="mailto:libbyhu@126.com" style="color: #ffffff; text-decoration: none;">libbyhu@126.com</a>
+</p>
+            </div>
+        </div>
+    </main>
+
+    <footer style="text-align: center; padding: 30px 4vw 40px; font-size: 10px; color: #aaa; letter-spacing: 0.05em; border-top: 1px solid rgba(0,0,0,0.08); margin-top: 20px;">
+    © 2026 roamsketch 版权所有 / All Rights Reserved
+    </footer>
+
+    <script>
+        const artworks = [
+            {
+                id: 11,
+                title: "BIRD",
+                sub: "++ 數碼繪圖 ++",
+                date: "2026.11",
+                medium: "數碼繪圖",
+                year: "2026",
+                images: [
+                    "images/1103-1.jpg",
+                    "images/1103-2.jpg",
+                ]
+            },
+            {
+                id: 10,
+                title: "CAVITY",
+                sub: "++ 數碼繪圖 ++",
+                date: "2026.11",
+                medium: "數碼繪圖",
+                year: "2026",
+                images: [
+                    "images/1102-1.jpg",
+                    "images/1102-2.jpg",
+                ]
+            },
+            {
+                id: 9,
+                title: "APSARA",
+                sub: "++ 數碼繪圖 ++",
+                date: "2026.11",
+                medium: "數碼繪圖",
+                year: "2026",
+                images: [
+                    "images/1101-1.jpg",
+                    "images/1101-2.jpg",
+                ]
+            },
+                        {
+                id: 8,
+                title: "臨 九原崗北朝壁畫墓并略改",
+                sub: "++ 纸本速写组图 ++",
+                date: "2026.11",
+                medium: "纸本、毛筆",
+                year: "2026",
+                images: [
+                    "images/11001.jpg",
+                    "images/11002.jpg",
+                    "images/11003.jpg",
+                    "images/11004.jpg",
+                ]
+            },
+            {
+                id: 7,
+                title: "另一個角度學習傳世經典",
+                sub: "++ 纸本速写组图 ++",
+                date: "2026.09",
+                medium: "纸本、圆珠笔",
+                year: "2026",
+                images: [
+                    "images/0922001.jpg",
+                    "images/0922002.jpg",
+                    "images/0922003.jpg",
+                    "images/0922004.jpg",
+                    "images/0922005.jpg",
+                ]
+            },
+            {
+                id: 6,
+                title: "你又認識多少名作",
+                sub: "++ 纸本速写组图 ++",
+                date: "2026.09",
+                medium: "纸本、圆珠笔",
+                year: "2026",
+                images: [
+                    "images/0917001.jpg",
+                    "images/0917002.jpg",
+                    "images/0917003.jpg",
+                    "images/0917004.jpg",
+                    "images/0917005.jpg",
+                    "images/0917006.jpg",
+                    "images/0917007.jpg",
+                    "images/0917008.jpg",
+                    "images/0917009.jpg"
+                ]
+            },
+            {
+                id: 5,
+                title: "Picasso的一些临摹",
+                sub: "++ 纸本速写组图 ++",
+                date: "2026.09",
+                medium: "纸本、圆珠笔",
+                year: "2026",
+                images: [
+                    "images/0901001.jpg",
+                    "images/0901002.jpg",
+                    "images/0901003.jpg",
+                    "images/0901004.jpg",
+                    "images/0901005.jpg",
+                    "images/0901006.jpg",
+                    "images/0901007.jpg",
+                    "images/0901008.jpg",
+                    "images/0901009.jpg"
+                ]
+            },
+            {
+                id: 4,
+                title: "连笔画下即将过去的八月花花",
+                sub: "++ 纸本速写组图 ++",
+                date: "2026.08",
+                medium: "纸本、圆珠笔",
+                year: "2026",
+                images: [
+                    "images/0826001.jpg",
+                    "images/0826002.jpg",
+                    "images/0826003.jpg",
+                    "images/0826004.jpg",
+                    "images/0826005.jpg",
+                    "images/0826006.jpg",
+                    "images/0826007.jpg",
+                    "images/0826008.jpg",
+                    "images/0826009.jpg",
+                ]
+            },
+            {
+                id: 3,
+                title: "静止的瞬间",
+                sub: "++ 纸本数码组图 ++",
+                date: "2026.08",
+                medium: "纸本、圆珠笔、数码绘画",
+                year: "2026",
+                images: [
+                    "images/0810001.jpg",
+                    "images/0810002.jpg",
+                    "images/0810003.jpg",
+                    "images/0810004.jpg",
+                    "images/0810005.jpg",
+                ]
+            },
+            {
+                id: 2,
+                title: "其实速写就是一件很治愈的事",
+                sub: "++ 纸本速写组图 ++",
+                date: "2026.08",
+                medium: "纸本、圆珠笔",
+                year: "2026",
+                images: [
+                    "images/0819cover.jpg",
+                    "images/0819001.jpg",
+                ]
+            },
+            {
+                id: 1,
+                title: "朋友仔",
+                sub: "++ 数码绘画组图 ++",
+                date: "2025",
+                medium: "数码绘画",
+                year: "2025",
+                images: [
+                    "images/0827001.jpg",
+                    "images/0827002.jpg",
+                    "images/0827003.jpg",
+                    "images/0827004.jpg",
+                    "images/0827005.jpg",
+                    "images/0827006.jpg",
+                    "images/0827007.jpg",
+                    "images/0827008.jpg",
+                    "images/0827009.jpg",
+                    "images/0827010.jpg",
+                    "images/0827011.jpg",
+                    "images/0827012.jpg",
+                    "images/0827013.jpg",
+                ]
+            }
+        ];
+
+        const currentImageIndexes = {};
+
+        function renderGallery() {
+            const homeContainer = document.getElementById('home');
+
+            // 首页展示全部作品（数组顺序即显示顺序）
+            const latestArtworks = artworks;
+
+            homeContainer.innerHTML = '<div class="home-grid">' + latestArtworks.map((item, index) => {
+                currentImageIndexes[item.id] = currentImageIndexes[item.id] || 0;
+                const activeImg = item.images[currentImageIndexes[item.id]];
+                const hasMultiple = item.images.length > 1;
+
+                return `
+                <div class="home-card">
+                    <div class="artwork-image-wrapper" onclick="openDetail(${item.id})">
+                        <img id="card-img-${item.id}" src="${activeImg}" alt="${item.title}" loading="lazy">
+                        ${hasMultiple ? `
+                            <button class="img-btn prev-btn" onclick="changeCardImage(event, ${item.id}, -1)">‹</button>
+                            <button class="img-btn next-btn" onclick="changeCardImage(event, ${item.id}, 1)">›</button>
+                            <div class="dots-container">
+                                ${item.images.map((_, i) => `<span class="dot ${i === currentImageIndexes[item.id] ? 'active' : ''}" id="dot-${item.id}-${i}"></span>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="home-card-info">
+                        <span class="exhibition-tag">${hasMultiple ? item.images.length + ' 张' : '1 张'}</span>
+                        <h1 class="exhibition-title">${item.title}</h1>
+                        <p class="exhibition-date">${item.date}</p>
+                    </div>
+                </div>
+                `;
+            }).join('') + '</div>';
+        }
+
+        function changeCardImage(event, itemId, direction) {
+            event.stopPropagation();
+            
+            const item = artworks.find(a => a.id === itemId);
+            if (!item) return;
+
+            let currentIndex = currentImageIndexes[itemId] || 0;
+            currentIndex += direction;
+
+            if (currentIndex < 0) currentIndex = item.images.length - 1;
+            if (currentIndex >= item.images.length) currentIndex = 0;
+
+            currentImageIndexes[itemId] = currentIndex;
+
+            const imgEl = document.getElementById(`card-img-${itemId}`);
+            if (imgEl) imgEl.src = item.images[currentIndex];
+
+            item.images.forEach((_, i) => {
+                const dot = document.getElementById(`dot-${itemId}-${i}`);
+                if (dot) dot.classList.toggle('active', i === currentIndex);
+            });
+        }
+
+        function openDetail(id, selectedImgIndex) {
+            const item = artworks.find(a => a.id === id);
+            if (!item) return;
+
+            const startImgIndex = selectedImgIndex !== undefined ? selectedImgIndex : (currentImageIndexes[id] || 0);
+
+            document.getElementById('detail-title').innerText = item.title;
+            document.getElementById('detail-year').innerText = item.year;
+            document.getElementById('detail-medium').innerText = item.medium;
+            document.getElementById('detail-img').src = item.images[startImgIndex];
+
+            const thumbsContainer = document.getElementById('detail-thumbs');
+            if (item.images.length > 1) {
+                thumbsContainer.style.display = 'flex';
+                thumbsContainer.innerHTML = item.images.map((imgUrl, i) => `
+                    <img src="${imgUrl}" 
+                         class="thumb-item ${i === startImgIndex ? 'active-thumb' : ''}" 
+                         onclick="switchDetailImage('${imgUrl}', this)" 
+                         alt="thumb">
+                `).join('');
+            } else {
+                thumbsContainer.style.display = 'none';
+            }
+            
+            switchPage('detail');
+        }
+
+        function switchDetailImage(imgUrl, thumbEl) {
+            document.getElementById('detail-img').src = imgUrl;
+            document.querySelectorAll('.thumb-item').forEach(el => el.classList.remove('active-thumb'));
+            thumbEl.classList.add('active-thumb');
+        }
+
+        function switchPage(pageId, navElement) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active-page'));
+            document.getElementById(pageId).classList.add('active-page');
+
+            if (navElement) {
+                document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+                navElement.classList.add('active');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        renderGallery();
+    </script>
+</body>
+</html>
